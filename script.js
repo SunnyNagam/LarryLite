@@ -2,7 +2,8 @@ const logElement = document.getElementById('log');
 const startButton = document.getElementById('start');
 const apiKeyInput = document.getElementById('apiKey'); // Get the input element for API key
 const triggerCommand = "hey larry"; // You can modify this to your preferred trigger
-let apiKey = ""
+let apiKey = "";
+let isListening = false; // Flag to indicate if the voice assistant is currently listening
 
 function saveApiKey(apiKey) {
     localStorage.setItem('apiKey', apiKey);
@@ -10,25 +11,6 @@ function saveApiKey(apiKey) {
 
 function getStoredApiKey() {
     return localStorage.getItem('apiKey');
-}
-
-function appendToLog(command, response) {
-    const messageContainer = document.createElement('div');
-    messageContainer.className = 'mb-4';
-    
-    const commandElement = document.createElement('div');
-    commandElement.className = 'text-right text-green-600';
-    commandElement.innerText = command;
-    
-    const responseElement = document.createElement('div');
-    responseElement.className = 'text-left text-blue-600';
-    responseElement.innerText = response;
-    
-    messageContainer.appendChild(commandElement);
-    messageContainer.appendChild(responseElement);
-    
-    logElement.appendChild(messageContainer);
-    logElement.scrollTop = logElement.scrollHeight; // Scroll to the bottom to see the latest message
 }
 
 // Retrieve the API key from local storage and set it in the input field when the page loads
@@ -51,17 +33,22 @@ if (!('webkitSpeechRecognition' in window)) {
     recognition.lang = 'en-US'; // Set language
 
     startButton.onclick = function() {
-        apiKey = apiKeyInput.value.trim(); // Get the API key from the input field
-        if (!apiKey) {
-            alert("Please enter your API key.");
-            return;
-        }
+        if (!isListening) {
+            apiKey = apiKeyInput.value.trim(); // Get the API key from the input field
+            if (!apiKey) {
+                alert("Please enter your API key.");
+                return;
+            }
 
-        saveApiKey(apiKey); // Save the API key to localStorage
-        recognition.start();
+            saveApiKey(apiKey); // Save the API key to localStorage
+            recognition.start();
+            logElement.innerText = "Listening...";
+            isListening = true; // Set the listening flag to true
+        }
     };
 
     recognition.onresult = function(event) {
+        let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
                 const transcript = event.results[i][0].transcript.trim();
@@ -72,18 +59,25 @@ if (!('webkitSpeechRecognition' in window)) {
                         // Speak the response
                         const utterance = new SpeechSynthesisUtterance(responseText);
                         synthesis.speak(utterance);
-    
+
                         // Append the command and response to the log
                         appendToLog(triggerCommand + ' ' + commandText, responseText);
                     });
                 }
+            } else {
+                interimTranscript += event.results[i][0].transcript;
             }
         }
     };
 
     recognition.onerror = function(event) {
         console.log(event);
-        logElement.innerText = `Error: ${event.error}`;
+        alert(`Error: ${event.error}`);
+    };
+
+    // Set the isListening flag to false when the recognition ends
+    recognition.onend = function() {
+        isListening = false;
     };
 }
 
@@ -110,4 +104,23 @@ async function getGPTResponse(text) {
     const data = await response.json();
     console.log(data);
     return data.choices && data.choices[0] && data.choices[0].message.content.trim();
+}
+
+function appendToLog(command, response) {
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'mb-4';
+
+    const commandElement = document.createElement('div');
+    commandElement.className = 'text-right text-green-600';
+    commandElement.innerText = command;
+
+    const responseElement = document.createElement('div');
+    responseElement.className = 'text-left text-blue-600';
+    responseElement.innerText = response;
+
+    messageContainer.appendChild(commandElement);
+    messageContainer.appendChild(responseElement);
+
+    logElement.appendChild(messageContainer);
+    logElement.scrollTop = logElement.scrollHeight; // Scroll to the bottom to see the latest message
 }
