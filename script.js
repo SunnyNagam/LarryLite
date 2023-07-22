@@ -77,12 +77,6 @@ if (!('webkitSpeechRecognition' in window)) {
         console.log(event);
         alert(`Error: ${event.error}`);
     };
-
-    recognition.onend = function() {
-        if(listening){
-            recognition.start();
-        }
-    }
 }
 
 function setTimer(duration) {
