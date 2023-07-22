@@ -12,6 +12,25 @@ function getStoredApiKey() {
     return localStorage.getItem('apiKey');
 }
 
+function appendToLog(command, response) {
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'mb-4';
+    
+    const commandElement = document.createElement('div');
+    commandElement.className = 'text-right text-green-600';
+    commandElement.innerText = command;
+    
+    const responseElement = document.createElement('div');
+    responseElement.className = 'text-left text-blue-600';
+    responseElement.innerText = response;
+    
+    messageContainer.appendChild(commandElement);
+    messageContainer.appendChild(responseElement);
+    
+    logElement.appendChild(messageContainer);
+    logElement.scrollTop = logElement.scrollHeight; // Scroll to the bottom to see the latest message
+}
+
 // Retrieve the API key from local storage and set it in the input field when the page loads
 window.onload = function() {
     const storedApiKey = getStoredApiKey();
@@ -40,11 +59,9 @@ if (!('webkitSpeechRecognition' in window)) {
 
         saveApiKey(apiKey); // Save the API key to localStorage
         recognition.start();
-        logElement.innerText = "Listening...";
     };
 
     recognition.onresult = function(event) {
-        let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
                 const transcript = event.results[i][0].transcript.trim();
@@ -55,13 +72,13 @@ if (!('webkitSpeechRecognition' in window)) {
                         // Speak the response
                         const utterance = new SpeechSynthesisUtterance(responseText);
                         synthesis.speak(utterance);
+    
+                        // Append the command and response to the log
+                        appendToLog(triggerCommand + ' ' + commandText, responseText);
                     });
                 }
-            } else {
-                interimTranscript += event.results[i][0].transcript;
             }
         }
-        logElement.innerText = interimTranscript;
     };
 
     recognition.onerror = function(event) {
