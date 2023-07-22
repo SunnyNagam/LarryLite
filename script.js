@@ -34,12 +34,7 @@ if (!('webkitSpeechRecognition' in window)) {
     recognition.lang = 'en-US'; // Set language
 
     startButton.onclick = function() {
-        const currentTime = Date.now();
-        const elapsedTime = currentTime - lastRecognitionTime;
-        const delay = 1000; // Set the delay (in milliseconds) before starting recognition again
-
-        if (!isListening && elapsedTime > delay) {
-            lastRecognitionTime = currentTime;
+        if (!isListening) {
             apiKey = apiKeyInput.value.trim(); // Get the API key from the input field
             if (!apiKey) {
                 alert("Please enter your API key.");
@@ -57,7 +52,12 @@ if (!('webkitSpeechRecognition' in window)) {
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
                 const transcript = event.results[i][0].transcript.trim();
-                if (transcript.toLowerCase().startsWith(triggerCommand)) {
+                const currentTime = Date.now();
+                const elapsedTime = currentTime - lastRecognitionTime;
+                const delay = 1000; // Set the delay (in milliseconds) before starting recognition again
+
+                if (transcript.toLowerCase().startsWith(triggerCommand) && elapsedTime > delay) {
+                    lastRecognitionTime = currentTime;
                     // Trigger detected, process the command
                     const commandText = transcript.slice(triggerCommand.length).trim();
                     getGPTResponse(commandText).then(responseText => {
