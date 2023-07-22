@@ -4,6 +4,7 @@ const apiKeyInput = document.getElementById('apiKey'); // Get the input element 
 const triggerCommand = "hey larry"; // You can modify this to your preferred trigger
 let apiKey = "";
 let isListening = false; // Flag to indicate if the voice assistant is currently listening
+let lastRecognitionTime = 0;
 
 function saveApiKey(apiKey) {
     localStorage.setItem('apiKey', apiKey);
@@ -33,7 +34,12 @@ if (!('webkitSpeechRecognition' in window)) {
     recognition.lang = 'en-US'; // Set language
 
     startButton.onclick = function() {
-        if (!isListening) {
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - lastRecognitionTime;
+        const delay = 1000; // Set the delay (in milliseconds) before starting recognition again
+
+        if (!isListening && elapsedTime > delay) {
+            lastRecognitionTime = currentTime;
             apiKey = apiKeyInput.value.trim(); // Get the API key from the input field
             if (!apiKey) {
                 alert("Please enter your API key.");
