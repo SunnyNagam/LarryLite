@@ -42,7 +42,6 @@ if (!('webkitSpeechRecognition' in window)) {
 
             saveApiKey(apiKey); // Save the API key to localStorage
             recognition.start();
-            logElement.innerText = "Listening...";
             isListening = true; // Set the listening flag to true
         }
     };
