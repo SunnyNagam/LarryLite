@@ -1,9 +1,9 @@
 const logElement = document.getElementById('log');
-const consoleElement = document.getElementById('console');
 const startButton = document.getElementById('start');
 const apiKeyInput = document.getElementById('apiKey'); // Get the input element for API key
 const triggerCommand = "hey larry"; // You can modify this to your preferred trigger
 let apiKey = "";
+let listening = false;
 
 function saveApiKey(apiKey) {
     localStorage.setItem('apiKey', apiKey);
@@ -42,12 +42,18 @@ if (!('webkitSpeechRecognition' in window)) {
 
         saveApiKey(apiKey); // Save the API key to localStorage
         console.log("Starting recognition...");
-        recognition.start();
+        if(!listening) {
+            listening = true;
+            startButton.innerText = "Stop Listening";
+            recognition.start();
+        } else {
+            listening = false;
+            startButton.innerText = "Start Listening";
+            recognition.abort();
+        }
     };
 
     recognition.onresult = function(event) {
-        consoleElement.innerText += event.results[0].isFinal+"/"+event.results.length + ": " + event.results[0][0].transcript+"\n";
-        console.log(event);
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
                 const transcript = event.results[i][0].transcript.trim();
@@ -71,6 +77,12 @@ if (!('webkitSpeechRecognition' in window)) {
         console.log(event);
         alert(`Error: ${event.error}`);
     };
+
+    recognition.onend = function() {
+        if(listening){
+            recognition.start();
+        }
+    }
 }
 
 function setTimer(duration) {
