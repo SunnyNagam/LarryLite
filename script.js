@@ -140,18 +140,28 @@ async function getGPTResponse(text) {
 
 function appendToLog(command, response) {
     const messageContainer = document.createElement('div');
-    messageContainer.className = 'mb-4';
+    messageContainer.className = 'mb-2';
 
-    const commandElement = document.createElement('div');
-    commandElement.className = 'text-right text-green-600';
-    commandElement.innerText = command;
+    const userLabel = document.createElement('div');
+    userLabel.className = 'text-sm font-semibold mb-1';
+    userLabel.innerText = 'You';
 
-    const responseElement = document.createElement('div');
-    responseElement.className = 'text-left text-blue-600';
-    responseElement.innerText = response;
+    const userMessage = document.createElement('div');
+    userMessage.className = 'bg-blue-500 text-white rounded-lg py-1 px-3 inline-block';
+    userMessage.innerText = command;
 
-    messageContainer.appendChild(commandElement);
-    messageContainer.appendChild(responseElement);
+    const assistantLabel = document.createElement('div');
+    assistantLabel.className = 'text-sm font-semibold mb-1 pt-1';
+    assistantLabel.innerText = 'Assistant';
+
+    const assistantMessage = document.createElement('div');
+    assistantMessage.className = 'bg-gray-800 rounded-lg py-1 px-3 inline-block';
+    assistantMessage.innerText = response;
+
+    messageContainer.appendChild(userLabel);
+    messageContainer.appendChild(userMessage);
+    messageContainer.appendChild(assistantLabel);
+    messageContainer.appendChild(assistantMessage);
 
     logElement.appendChild(messageContainer);
     logElement.scrollTop = logElement.scrollHeight; // Scroll to the bottom to see the latest message
