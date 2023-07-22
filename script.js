@@ -5,6 +5,7 @@ const apiKeyInput = document.getElementById('apiKey');
 const triggerCommand = "hey larry"; 
 let apiKey = "";
 let listening = false;
+let aborted = false;
 
 function saveApiKey(apiKey) {
     localStorage.setItem('apiKey', apiKey);
@@ -49,10 +50,12 @@ if (!('webkitSpeechRecognition' in window)) {
             listening = true;
             startButton.innerText = "Stop Listening";
             recognition.start();
+            aborted = false;
         } else {
             listening = false;
             startButton.innerText = "Start Listening";
             recognition.abort();
+            aborted = true;
         }
     };
 
@@ -78,13 +81,14 @@ if (!('webkitSpeechRecognition' in window)) {
 
     recognition.onerror = function(event) {
         console.log(event);
-        alert(`Error: ${event.error}`);
         loadingElement.innerText = "Error: " + event.error;
         loadingElement.classList.remove('hidden');
     };
 
     recognition.onend = function() {
-        recognition.start();
+        if (!aborted) {
+            recognition.start();
+        }
     }
 }
 
