@@ -1,7 +1,24 @@
 const logElement = document.getElementById('log');
 const startButton = document.getElementById('start');
+const apiKeyInput = document.getElementById('apiKey'); // Get the input element for API key
 const triggerCommand = "hey larry"; // You can modify this to your preferred trigger
 let apiKey = ""
+
+function saveApiKey(apiKey) {
+    localStorage.setItem('apiKey', apiKey);
+}
+
+function getStoredApiKey() {
+    return localStorage.getItem('apiKey');
+}
+
+// Retrieve the API key from local storage and set it in the input field when the page loads
+window.onload = function() {
+    const storedApiKey = getStoredApiKey();
+    if (storedApiKey) {
+        apiKeyInput.value = storedApiKey;
+    }
+};
 
 // Check if Speech API is supported
 if (!('webkitSpeechRecognition' in window)) {
@@ -14,8 +31,6 @@ if (!('webkitSpeechRecognition' in window)) {
     recognition.interimResults = true; // We want interim results
     recognition.lang = 'en-US'; // Set language
 
-    const apiKeyInput = document.getElementById('apiKey'); // Get the input element for API key
-
     startButton.onclick = function() {
         apiKey = apiKeyInput.value.trim(); // Get the API key from the input field
         if (!apiKey) {
@@ -23,6 +38,7 @@ if (!('webkitSpeechRecognition' in window)) {
             return;
         }
 
+        saveApiKey(apiKey); // Save the API key to localStorage
         recognition.start();
         logElement.innerText = "Listening...";
     };
