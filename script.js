@@ -1,4 +1,5 @@
 const logElement = document.getElementById('log');
+const loadingElement = document.getElementById('loading');
 const startButton = document.getElementById('start');
 const apiKeyInput = document.getElementById('apiKey');
 const triggerCommand = "hey larry"; 
@@ -60,9 +61,11 @@ if (!('webkitSpeechRecognition' in window)) {
                 if (transcript.toLowerCase().startsWith(triggerCommand)) {
                     // Trigger detected, process the command
                     const commandText = transcript.slice(triggerCommand.length).trim();
-
+                    loadingElement.classList.remove('hidden');
                     getGPTResponse(commandText).then(responseText => {
+                        loadingElement.classList.add('hidden');
                         const utterance = new SpeechSynthesisUtterance(responseText);
+                        utterance.rate = 1.33;
                         synthesis.speak(utterance);
                         appendToLog(triggerCommand + ' ' + commandText, responseText);
                     });
@@ -92,7 +95,7 @@ async function getGPTResponse(text) {
     let model = "gpt-3.5-turbo";
     let body  = { model: model, temperature: 0.8 }
     //body.stream = true // todo figure out how to stream response 
-    body.messages = [ { role: "user", content: text} ]
+    body.messages = [ { role: "user", content: "Keep your responses concise. "+text} ]
     body.functions = [
             {
                 name: 'setTimer',
