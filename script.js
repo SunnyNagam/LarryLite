@@ -4,9 +4,6 @@ const startButton = document.getElementById('start');
 const apiKeyInput = document.getElementById('apiKey'); // Get the input element for API key
 const triggerCommand = "hey larry"; // You can modify this to your preferred trigger
 let apiKey = "";
-let isListening = false; // Flag to indicate if the voice assistant is currently listening
-let lastRecognitionTime = 0;
-let recognizedCommand = '';
 
 function saveApiKey(apiKey) {
     localStorage.setItem('apiKey', apiKey);
@@ -37,18 +34,15 @@ if (!('webkitSpeechRecognition' in window)) {
     recognition.maxAlternatives = 1; // Get only one alternative
 
     startButton.onclick = function() {
-        if (!isListening) {
-            apiKey = apiKeyInput.value.trim(); // Get the API key from the input field
-            if (!apiKey) {
-                alert("Please enter your API key.");
-                return;
-            }
-
-            saveApiKey(apiKey); // Save the API key to localStorage
-            console.log("Starting recognition...");
-            recognition.start();
-            isListening = true; // Set the listening flag to true
+        apiKey = apiKeyInput.value.trim(); // Get the API key from the input field
+        if (!apiKey) {
+            alert("Please enter your API key.");
+            return;
         }
+
+        saveApiKey(apiKey); // Save the API key to localStorage
+        console.log("Starting recognition...");
+        recognition.start();
     };
 
     recognition.onresult = function(event) {
@@ -56,14 +50,8 @@ if (!('webkitSpeechRecognition' in window)) {
         console.log(event);
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
-                console.log(event.results[i][0].transcript.trim());
                 const transcript = event.results[i][0].transcript.trim();
-                const currentTime = Date.now();
-                const elapsedTime = currentTime - lastRecognitionTime;
-                const delay = 1000; // Set the delay (in milliseconds) before starting recognition again
-
-                if (transcript.toLowerCase().startsWith(triggerCommand) && elapsedTime > delay) {
-                    //lastRecognitionTime = currentTime;
+                if (transcript.toLowerCase().startsWith(triggerCommand)) {
                     // Trigger detected, process the command
                     const commandText = transcript.slice(triggerCommand.length).trim();
                     getGPTResponse(commandText).then(responseText => {
@@ -82,11 +70,6 @@ if (!('webkitSpeechRecognition' in window)) {
     recognition.onerror = function(event) {
         console.log(event);
         alert(`Error: ${event.error}`);
-    };
-
-    // Set the isListening flag to false when the recognition ends
-    recognition.onend = function() {
-        isListening = false;
     };
 }
 
