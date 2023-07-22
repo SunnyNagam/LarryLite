@@ -35,6 +35,8 @@ if (!('webkitSpeechRecognition' in window)) {
     recognition.maxAlternatives = 1; // Get only one alternative
 
     startButton.onclick = function() {
+        loadingElement.innerText = "Thinking...";
+        loadingElement.classList.add('hidden');
         apiKey = apiKeyInput.value.trim(); // Get the API key from the input field
         if (!apiKey) {
             alert("Please enter your API key.");
@@ -77,7 +79,13 @@ if (!('webkitSpeechRecognition' in window)) {
     recognition.onerror = function(event) {
         console.log(event);
         alert(`Error: ${event.error}`);
+        loadingElement.innerText = "Error: " + event.error;
+        loadingElement.classList.remove('hidden');
     };
+
+    recognition.onend = function() {
+        recognition.start();
+    }
 }
 
 function setTimer(duration) {
