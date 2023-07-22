@@ -6,6 +6,7 @@ const triggerCommand = "hey larry"; // You can modify this to your preferred tri
 let apiKey = "";
 let isListening = false; // Flag to indicate if the voice assistant is currently listening
 let lastRecognitionTime = 0;
+let recognizedCommand = '';
 
 function saveApiKey(apiKey) {
     localStorage.setItem('apiKey', apiKey);
@@ -31,8 +32,9 @@ if (!('webkitSpeechRecognition' in window)) {
     const synthesis = window.speechSynthesis;
 
     recognition.continuous = true; // Listen continuously
-    recognition.interimResults = true; // We want interim results
+    recognition.interimResults = false; // We want interim results
     recognition.lang = 'en-US'; // Set language
+    recognition.maxAlternatives = 1; // Get only one alternative
 
     startButton.onclick = function() {
         if (!isListening) {
@@ -50,7 +52,7 @@ if (!('webkitSpeechRecognition' in window)) {
     };
 
     recognition.onresult = function(event) {
-        consoleElement.innerText += event.results[0].isFinal + ": " + event.results[0][0].transcript+"\n";
+        consoleElement.innerText += event.results[0].isFinal+"/"+event.results.length + ": " + event.results[0][0].transcript+"\n";
         console.log(event);
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
@@ -58,7 +60,7 @@ if (!('webkitSpeechRecognition' in window)) {
                 const transcript = event.results[i][0].transcript.trim();
                 const currentTime = Date.now();
                 const elapsedTime = currentTime - lastRecognitionTime;
-                const delay = 100; // Set the delay (in milliseconds) before starting recognition again
+                const delay = 1000; // Set the delay (in milliseconds) before starting recognition again
 
                 if (transcript.toLowerCase().startsWith(triggerCommand) && elapsedTime > delay) {
                     //lastRecognitionTime = currentTime;
