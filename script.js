@@ -58,10 +58,10 @@ if (!('webkitSpeechRecognition' in window)) {
                 const transcript = event.results[i][0].transcript.trim();
                 const currentTime = Date.now();
                 const elapsedTime = currentTime - lastRecognitionTime;
-                const delay = 1000; // Set the delay (in milliseconds) before starting recognition again
+                const delay = 100; // Set the delay (in milliseconds) before starting recognition again
 
                 if (transcript.toLowerCase().startsWith(triggerCommand) && elapsedTime > delay) {
-                    lastRecognitionTime = currentTime;
+                    //lastRecognitionTime = currentTime;
                     // Trigger detected, process the command
                     const commandText = transcript.slice(triggerCommand.length).trim();
                     getGPTResponse(commandText).then(responseText => {
