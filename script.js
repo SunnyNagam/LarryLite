@@ -1,7 +1,7 @@
 const logElement = document.getElementById('log');
 const startButton = document.getElementById('start');
-const apiKeyInput = document.getElementById('apiKey'); // Get the input element for API key
-const triggerCommand = "hey larry"; // You can modify this to your preferred trigger
+const apiKeyInput = document.getElementById('apiKey');
+const triggerCommand = "hey larry"; 
 let apiKey = "";
 let listening = false;
 
@@ -60,12 +60,10 @@ if (!('webkitSpeechRecognition' in window)) {
                 if (transcript.toLowerCase().startsWith(triggerCommand)) {
                     // Trigger detected, process the command
                     const commandText = transcript.slice(triggerCommand.length).trim();
+
                     getGPTResponse(commandText).then(responseText => {
-                        // Speak the response
                         const utterance = new SpeechSynthesisUtterance(responseText);
                         synthesis.speak(utterance);
-
-                        // Append the command and response to the log
                         appendToLog(triggerCommand + ' ' + commandText, responseText);
                     });
                 }
@@ -90,14 +88,10 @@ function setTimer(duration) {
 }
 
 async function getGPTResponse(text) {
-    // Call the chatGPT API
-    // Note: Since this example is client-side only, there are security concerns regarding API key exposure.
-    // Ideally, you'd use server-side code to make this request.
     const apiUrl = "https://api.openai.com/v1/chat/completions";
-    //const apiKey = 2; // DO NOT expose this in production on client-side
     let model = "gpt-3.5-turbo";
     let body  = { model: model, temperature: 0.8 }
-    //body.stream = true 
+    //body.stream = true // todo figure out how to stream response 
     body.messages = [ { role: "user", content: text} ]
     body.functions = [
             {
@@ -164,5 +158,5 @@ function appendToLog(command, response) {
     messageContainer.appendChild(assistantMessage);
 
     logElement.appendChild(messageContainer);
-    logElement.scrollTop = logElement.scrollHeight; // Scroll to the bottom to see the latest message
+    logElement.scrollTop = logElement.scrollHeight; 
 }
