@@ -87,6 +87,16 @@ if (!('webkitSpeechRecognition' in window)) {
     };
 }
 
+function setTimer(duration) {
+    const synthesis = window.speechSynthesis;
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(`Your ${duration} minutes timer is finished.`);
+        synthesis.speak(utterance);
+    }, duration * 60 * 1000);
+    const utterance = new SpeechSynthesisUtterance(`Timer of ${duration} minutes has been set.`);
+    synthesis.speak(utterance);
+}
+
 async function getGPTResponse(text) {
     // Call the chatGPT API
     // Note: Since this example is client-side only, there are security concerns regarding API key exposure.
@@ -97,6 +107,19 @@ async function getGPTResponse(text) {
     let body  = { model: model, temperature: 0.8 }
     //body.stream = true 
     body.messages = [ { role: "user", content: text} ]
+    body.functions = [
+            {
+                name: 'setTimer',
+                description: 'Set a timer for a given duration',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        duration: { type: 'integer', description: 'The duration of the timer in minutes' },
+                    },
+                    required: ['duration'],
+                },
+            },
+        ];
 
     const response = await fetch(apiUrl, {
         method: "POST",
@@ -109,5 +132,16 @@ async function getGPTResponse(text) {
 
     const data = await response.json();
     console.log(data);
+
+    const functionCall = data['choices'][0]['message']['function_call'];
+    if (functionCall) {
+        const functionName = functionCall['name'];
+        const functionArgs = JSON.parse(functionCall['arguments']);
+
+        let functionResponse;
+        if (functionName === 'setTimer') {
+            functionResponse = setTimer(functionArgs['duration']);
+        }
+    }
     return data.choices && data.choices[0] && data.choices[0].message.content.trim();
 }
