@@ -120,12 +120,13 @@ submitTextButton.addEventListener('click', async () => {
     }
 
     textInput.value = ""; // Clear the input field after submission
+    loadingElement.innerText = "Thinking...";
     loadingElement.classList.remove('hidden');
     
     try {
         const responseText = await getGeminiResponse(textPrompt);
         loadingElement.classList.add('hidden');
-        appendToLog("Text Prompt", responseText);
+        appendToLog(textPrompt, responseText);
     } catch (error) {
         console.error(error);
         loadingElement.innerText = "Error: " + error.message;
