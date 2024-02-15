@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Larry</title>
-    <!-- Include Tailwind CSS from CDN -->
+    <title>LarryLite V1.16</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
@@ -16,8 +15,17 @@
         <div id="loading" class="hidden text-center text-gray-400 mt-4">
             <p>Thinking...</p>
         </div>
+        <input type="text" id="textInput" placeholder="Type your prompt here" class="w-full rounded-md px-4 py-2 mt-4 focus:outline-none focus:ring focus:border-blue-300 bg-gray-700 text-white">
+        <button id="submitText" class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring focus:border-blue-300">Ask LarryLite</button>
         <div id="log" class="mt-4 py-2 px-4 bg-gray-700 border-0px rounded-md max-h-65 overflow-y-auto"></div>
     </div>
-    <script src="script.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai"
+          }
+        }
+    </script>
+    <script src="script.js" type="module"></script>
 </body>
 </html>

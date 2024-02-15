@@ -1,7 +1,12 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 const logElement = document.getElementById('log');
 const loadingElement = document.getElementById('loading');
 const startButton = document.getElementById('start');
 const apiKeyInput = document.getElementById('apiKey');
+const textInput = document.getElementById('textInput');
+const submitTextButton = document.getElementById('submitText');
+
 const triggerCommand = "hey larry"; 
 let apiKey = "";
 let listening = false;
@@ -48,11 +53,15 @@ if (!('webkitSpeechRecognition' in window)) {
         console.log("Starting recognition...");
         if(!listening) {
             listening = true;
+            startButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            startButton.classList.add('bg-red-500', 'hover:bg-red-600');
             startButton.innerText = "Stop Listening";
             recognition.start();
             aborted = false;
         } else {
             listening = false;
+            startButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+            startButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
             startButton.innerText = "Start Listening";
             recognition.abort();
             aborted = true;
@@ -102,6 +111,28 @@ function setTimer(duration) {
     synthesis.speak(utterance);
 }
 
+// Submit button click handler
+submitTextButton.addEventListener('click', async () => {
+    const textPrompt = textInput.value.trim();
+    if (!textPrompt) {
+        alert("Please enter a prompt.");
+        return;
+    }
+
+    textInput.value = ""; // Clear the input field after submission
+    loadingElement.classList.remove('hidden');
+    
+    try {
+        const responseText = await getGeminiResponse(textPrompt);
+        loadingElement.classList.add('hidden');
+        appendToLog("Text Prompt", responseText);
+    } catch (error) {
+        console.error(error);
+        loadingElement.innerText = "Error: " + error.message;
+        loadingElement.classList.remove('hidden');
+    }
+});
+
 async function getGPTResponse(text) {
     const apiUrl = "https://api.openai.com/v1/chat/completions";
     let model = "gpt-3.5-turbo";
@@ -145,6 +176,17 @@ async function getGPTResponse(text) {
         }
     }
     return data.choices && data.choices[0] && data.choices[0].message.content.trim();
+}
+
+async function getGeminiResponse(text) {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.0-pro"});
+
+    const result = await geminiModel.generateContent(text);
+    const response = await result.response;
+    const textResp = response.text();
+    console.log(response);
+    return textResp;
 }
 
 function appendToLog(command, response) {
